@@ -1,4 +1,4 @@
-import { useReducer ,useRef,useState,createContext,useEffect} from 'react'
+import { useReducer, useRef, useState, createContext, useEffect } from 'react'
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import Diary from './pages/Diary'
@@ -7,72 +7,67 @@ import Home from './pages/Home'
 import New from './pages/New'
 import NotFound from './pages/NotFound'
 
-const mockData=[
+const mockData = [
   {
-    id:1,
-    createdDate:new Date().getTime(),
-    emotionId:1,
-    content:'1번 일기의 내용'
+    id: 1,
+    createdDate: new Date().getTime(),
+    emotionId: 1,
+    content: '1번 일기의 내용'
   },
   {
-    id:2,
-    createdDate:new Date().getTime(),
-    emotionId:3,
-    content:'2번 일기의 내용'
+    id: 2,
+    createdDate: new Date().getTime(),
+    emotionId: 3,
+    content: '2번 일기의 내용'
   }
 ]
 
-function reducer(state, action){
-  switch(action.type){
+function reducer(state, action) {
+  switch (action.type) {
     case "INIT":
       return action.data
     case "CREATE":
-      return [action.data,...state]
-    
+      return [action.data, ...state]
     case "UPDATE":
-      return state.map((item)=>
-        String(item.id)===String(action.data.id) ? action.data :item
+      return state.map((item) =>
+        String(item.id) === String(action.data.id) ? action.data : item
       )
-
     case "DELETE":
       return state.filter(
-        (item)=>String(item.id)!==String(action.id)
+        (item) => String(item.id) !== String(action.id)
       )
-      default:
-        return state
+    default:
+      return state
   }
+
 }
 
 export const DiaryStateContext = createContext()
 export const DiaryDispatchContext = createContext()
 
-
 function App() {
 
 
-  const [data,dispatch]=useReducer(reducer, mockData)
+  const [data, dispatch] = useReducer(reducer, mockData)
   const idRef = useRef(3)
-  const [isDataLoaded,setIsDataLoaded]=useState(false)
+  const [isDataLoaded, setIsDataLoaded] = useState(false)
 
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch({
       type: 'INIT',
       data: mockData
     })
-    
+
     setIsDataLoaded(true)
-  
-  },[])
-
-  
+  }, [])
 
 
-  const onCreate=(createdDate,emotionId,content)=>{
+  const onCreate = (createdDate, emotionId, content) => {
     dispatch({
-      type:'CREATE',
-      data:{
-        id:idRef.current++,
+      type: 'CREATE',
+      data: {
+        id: idRef.current++,
         createdDate,
         emotionId,
         content
@@ -80,10 +75,10 @@ function App() {
     })
   }
 
-  const onUpdate=(id,createdDate,emotionId,content)=>{
+  const onUpdate = (id, createdDate, emotionId, content) => {
     dispatch({
-      type:'UPDATE',
-      data:{
+      type: 'UPDATE',
+      data: {
         id,
         createdDate,
         emotionId,
@@ -92,31 +87,29 @@ function App() {
     })
   }
 
-  const onDelete=(id)=>{
+  const onDelete = (id) => {
     dispatch({
-      type:'DELETE',
-        id
-      
+      type: 'DELETE',
+      id
     })
   }
 
-  if(isDataLoaded) return <div>로딩중</div>
-
+  if (!isDataLoaded) return <div>로딩중</div>
   return (
     <div>
       <DiaryStateContext.Provider value={data}>
-        <DiaryDispatchContext.Provider value={(onCreate, onUpdate, onDelete)}>
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/new' element={<New />} />
-        <Route path='/edit/:id' element={<Edit />} />
-        <Route path='/diary/:id' element={<Diary />} />
-        <Route path='*' element={<NotFound />} />
+        <DiaryDispatchContext.Provider value={{onCreate,onUpdate,onDelete}}>
 
-      </Routes>
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/new' element={<New />} />
+            <Route path='/edit/:id' element={<Edit />} />
+            <Route path='/diary/:id' element={<Diary />} />
+            <Route path='*' element={<NotFound />} />
+
+          </Routes>
         </DiaryDispatchContext.Provider>
       </DiaryStateContext.Provider>
-
     </div>
   )
 }
